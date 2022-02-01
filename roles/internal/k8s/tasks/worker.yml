@@ -1,0 +1,2 @@
+- debug:
+    msg: "Setup the kube worker cloud-init launch scripts"

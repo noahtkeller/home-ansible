@@ -1,0 +1,11 @@
+---
+
+- name: K8s | User
+  include: user.yml
+  tags:
+    - kubernetes_user
+
+- name: K8s | Install
+  include: install.yml
+  tags:
+    - kubernetes_install

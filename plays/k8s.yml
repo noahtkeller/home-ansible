@@ -1,0 +1,7 @@
+---
+# file: kubernetes.yml
+- name: 'Setup K8s'
+  hosts: all
+  become: true
+  roles:
+    - k8s

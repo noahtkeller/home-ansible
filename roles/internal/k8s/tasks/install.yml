@@ -1,0 +1,55 @@
+- name: Add kernel modules
+  modprobe:
+    name: "{{ item }}"
+  with_items: "{{ kernel_modules }}"
+
+- name: Add google apt signing key
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: Add kubernetes repository
+  apt_repository:
+    repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    filename: /etc/apt/sources.list.d/kubernetes.list
+    update_cache: yes
+
+- name: install packages
+  apt:
+    name:
+      - containerd
+      - kubelet
+      - kubeadm
+      - kubectl
+      - acl
+    state: latest
+    update_cache: true
+
+- name: Create files and folders
+  file:
+    path: "{{ item.path }}"
+    state: "{{ item.state }}"
+  with_items:
+    - { path: "/etc/modules-load.d/containerd.conf", state: "touch" }
+    - { path: "/etc/sysctl.d/99-kubernetes-cri.conf", state: "touch" }
+    - { path: "/etc/containerd", state: "directory" }
+
+- name: Add conf for containerd
+  lineinfile:
+    path: "/etc/modules-load.d/containerd.conf"
+    line: "{{ item }}"
+  with_items: "{{ kernel_modules }}"
+
+- name: Set values in /etc/sysctl.d/99-kubernetes-cri.conf
+  sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_set: yes
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+  with_dict: "{{ sysctl_config }}"
+
+- name: containerd config
+  shell: |
+    sudo containerd config default | sudo tee /etc/containerd/config.toml

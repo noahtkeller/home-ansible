@@ -1,0 +1,7 @@
+---
+# file hardened_server.yml
+- name: 'Harden Server'
+  hosts: default
+  become: true
+  roles:
+    - ansible-collection-hardening
